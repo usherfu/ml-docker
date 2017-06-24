@@ -9,16 +9,18 @@ pip3 install --upgrade tensorflow tensorflow-gpu
 
 #How to build docker image
 - build gpu version
-```	
+```bash
 	sudo docker build --pull -t ml-docker-devel-gpu -f Dockerfile.devel-gpu .
 ```
 - build cpu version
-```	
+```bash
 	sudo docker build --pull -t ml-docker-devel-cpu -f Dockerfile.devel .
 ```
 
 ## How to start docker instance
-sudo nvidia-docker run -it --rm -v ~/Work/repo/Behavioral-Cloning/:/sharedfolder -p 4567:4567 ml-docker-devel-gpu bash
+```bash
+	sudo nvidia-docker run -it --rm -v ~/Work/repo/Behavioral-Cloning/:/sharedfolder -p 4567:4567 ml-docker-devel-gpu bash
+```
 
 ## run python script to autonomous drive
 python3 drive.py model.json
