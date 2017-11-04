@@ -44,7 +44,7 @@ https://github.com/NVIDIA/nvidia-docker/wiki/CUDA
 
 
 
-## troubleshooting
+## Troubleshooting
 
 1. OSError: protocol not found
   File "/usr/local/lib/python3.5/dist-packages/eventlet/support/dns/rdtypes/IN/WKS.py", line 23, in <module>
@@ -54,31 +54,13 @@ OSError: protocol not found
 Solution:
 https://stackoverflow.com/questions/40184788/protocol-not-found-socket-getprotobyname
 
-
-repo on self driving car
-https://github.com/upul/Behavioral-Cloning
-https://github.com/harvitronix/reinforcement-learning-car
-
-##### run python script to autonomous drive
-python3 drive.py model.json
-
-## train model
-
-
-Steering ratio
-- https://zhengludwig.wordpress.com/projects/self-driving-rc-car/
- build CNN to directly predict "left, right, forward, reverse"
-
-https://medium.com/@ksakmann/behavioral-cloning-make-a-car-drive-like-yourself-dc6021152713
-
-center,left,right,steering,throttle,brake,speed
-
-1. collect data and preprocessing the data (augmentation, steering and etc)
-2. train the model with collected data
-3. test model
-
------------clean up docker folder aufs/diff----------
- -- sort folder size 
+### Clean up docker folder aufs/diff
+- Sort folder size 
+```bash 	
  	sudo du -H --max-depth=1 /var/lib/docker/aufs/ | sort -n -r
- -- clean up docker folder /var/lib/docker/aufs/
+```
+
+- Clean up docker folder /var/lib/docker/aufs/
+```bash
 	docker run --rm -v /var/run/docker.sock:/var/run/docker.sock -v /etc:/etc spotify/docker-gc 
+```
