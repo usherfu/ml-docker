@@ -1,8 +1,8 @@
 FROM nvidia/cuda:8.0-cudnn6-devel-ubuntu16.04
 
-MAINTAINER Craig Citro <craigcitro@google.com>
+LABEL maintainer="Craig Citro <craigcitro@google.com>"
 
-RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-recommends \
+RUN apt-get update && apt-get install -y --no-install-recommends \
         build-essential \
         curl \
         git \
@@ -19,11 +19,11 @@ RUN apt-get update && apt-get upgrade -y && apt-get install -y --no-install-reco
         zlib1g-dev \
         openjdk-8-jdk \
         openjdk-8-jre-headless \
+        wget \
         libcudnn5 \
         python3-tk \
         vim \
-        python-matplotlib \
-        && \
+        python-matplotlib && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
@@ -61,7 +61,7 @@ RUN echo "startup --batch" >>/etc/bazel.bazelrc
 RUN echo "build --spawn_strategy=standalone --genrule_strategy=standalone" \
     >>/etc/bazel.bazelrc
 # Install the most recent bazel release.
-ENV BAZEL_VERSION 0.5.0
+ENV BAZEL_VERSION 0.5.4
 WORKDIR /
 RUN mkdir /bazel && \
     cd /bazel && \
@@ -76,7 +76,7 @@ RUN mkdir /bazel && \
 
 RUN git clone https://github.com/tensorflow/tensorflow.git && \
     cd tensorflow && \
-    git checkout r1.2
+    git checkout r1.4
 WORKDIR /tensorflow
 
 # Configure the build for our CUDA configuration.
@@ -85,9 +85,14 @@ ENV LD_LIBRARY_PATH /usr/local/cuda/extras/CUPTI/lib64:$LD_LIBRARY_PATH
 ENV TF_NEED_CUDA 1
 ENV TF_CUDA_COMPUTE_CAPABILITIES=3.0,3.5,5.2,6.0,6.1
 
-RUN tensorflow/tools/ci_build/builds/configured GPU \
-    bazel build -c opt --config=cuda --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
+
+RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
+    LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs:${LD_LIBRARY_PATH} \
+    tensorflow/tools/ci_build/builds/configured GPU \
+    bazel build -c opt --config=cuda \
+    --cxxopt="-D_GLIBCXX_USE_CXX11_ABI=0" \
         tensorflow/tools/pip_package:build_pip_package && \
+    rm /usr/local/cuda/lib64/stubs/libcuda.so.1 && \
     bazel-bin/tensorflow/tools/pip_package/build_pip_package /tmp/pip && \
     pip --no-cache-dir install --upgrade /tmp/pip/tensorflow-*.whl && \
     rm -rf /tmp/pip && \
@@ -95,13 +100,40 @@ RUN tensorflow/tools/ci_build/builds/configured GPU \
 # Clean up pip wheel and Bazel cache when done.
 
 #Added by Usher
-RUN apt-get update && \
-    apt-get install -y python3-pip && \
-    pip3 install keras eventlet python-socketio pillow flask pandas opencv-python matplotlib h5py && \
+RUN apt-get update && apt-get install -y python3-pip && \
+    pip3 install keras eventlet python-socketio pillow flask pandas matplotlib h5py && \
     pip3 install --upgrade tensorflow tensorflow-gpu
+
 
 #https://stackoverflow.com/questions/40184788/protocol-not-found-socket-getprotobyname
 RUN apt-get -o Dpkg::Options::="--force-confmiss" install -y --reinstall netbase
+
+###############
+#Install OpenCV
+###############
+RUN apt-get update -y && apt-get dist-upgrade -y && apt-get autoremove -y && \
+    apt-get install -y libqt4-dev cmake libgtk2.0-dev python-dev python-numpy libtbb2 libtbb-dev libjpeg-dev libpng-dev libtiff-dev libjasper-dev libdc1394-22-dev \
+    libavcodec-dev libavformat-dev libswscale-dev libv4l-dev libxvidcore-dev libx264-dev libgtk-3-dev libatlas-base-dev gfortran \
+    python2.7-dev python3.5-dev
+
+ARG OPENCV_VERSION=3.3.1
+#download opencv and opencv_contrib
+RUN cd /root && \
+    wget -q --show-progress -O opencv.zip https://github.com/opencv/opencv/archive/${OPENCV_VERSION}.zip  && unzip opencv.zip && rm opencv.zip && \
+    wget -q --show-progress -O opencv_contrib.zip https://github.com/opencv/opencv_contrib/archive/${OPENCV_VERSION}.zip && unzip opencv_contrib.zip && rm opencv_contrib.zip &&\
+    cd ~/opencv-${OPENCV_VERSION} && \
+    mkdir build && cd build && \
+    cmake -D CMAKE_BUILD_TYPE=RELEASE -D CMAKE_INSTALL_PREFIX=/usr/local -D WITH_TBB=ON -D BUILD_NEW_PYTHON_SUPPORT=ON -D WITH_V4L=ON -D INSTALL_C_EXAMPLES=ON -D INSTALL_PYTHON_EXAMPLES=ON -D BUILD_EXAMPLES=ON -D WITH_QT=ON -D WITH_GTK=ON -D WITH_OPENGL=ON -D CUDA_CUDA_LIBRARY=/usr/local/cuda/lib64/stubs/libcuda.so OPENCV_EXTRA_MODULES_PATH=~/opencv_contrib-${OPENCV_VERSION}/modules -D PYTHON_EXECUTABLE=/usr/bin/python3 .. && \
+    make --jobs=$(nproc) && \
+    make install && \
+    ldconfig && \
+    cd /usr/local/lib/python3.5 && mkdir site-packages && \
+    mv /usr/local/lib/python3.5/dist-packages/cv2.cpython-35m-x86_64-linux-gnu.so /usr/local/lib/python3.5/dist-packages/cv2.so && \
+    chmod +x /usr/local/lib/python3.5/dist-packages/cv2.so && \
+    ln -s /usr/local/lib/python3.5/dist-packages/cv2.so /usr/local/lib/python3.5/site-packages/cv2.so
+
+ENV QT_X11_NO_MITSHM=1    
+#End of Added by Usher
 
 WORKDIR /root
 
