@@ -49,11 +49,10 @@ https://github.com/NVIDIA/nvidia-docker/wiki/CUDA
   File "/usr/local/lib/python3.5/dist-packages/eventlet/support/dns/rdtypes/IN/WKS.py", line 23, in <module>
     _proto_tcp = socket.getprotobyname('tcp')
 OSError: protocol not found
+[Solution](https://stackoverflow.com/questions/40184788/protocol-not-found-socket-getprotobyname)
 
-Solution:
-https://stackoverflow.com/questions/40184788/protocol-not-found-socket-getprotobyname
 
-### Clean up docker folder aufs/diff
+## Clean up docker folder aufs/diff
 - Sort folder size 
 ```bash 	
  	sudo du -H --max-depth=1 /var/lib/docker/aufs/ | sort -n -r
