@@ -101,8 +101,8 @@ RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/lib
 
 #Added by Usher
 RUN apt-get update && apt-get install -y python3-pip && \
-    pip3 install keras eventlet python-socketio pillow flask pandas matplotlib h5py && \
-    pip3 install --upgrade tensorflow tensorflow-gpu
+    pip3 install keras eventlet python-socketio pillow flask pandas matplotlib h5py scikit-learn && \
+    pip3 install --upgrade tensorflow tensorflow-gpu pip
 
 
 #https://stackoverflow.com/questions/40184788/protocol-not-found-socket-getprotobyname

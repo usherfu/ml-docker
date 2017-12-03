@@ -36,7 +36,7 @@ However, I end up building opencv and opencv_contrib from source code, and fixed
 
 #### How to start docker instance with DISPLAY support
 ```bash
-sudo nvidia-docker run -it --rm -v /tmp/.X11-unix:/tmp/.X11-unix -v $XAUTHORITY:$XAUTHORITY -e XAUTHORITY=$XAUTHORITY -h $(hostname) -e DISPLAY=$DISPLAY -v ~/Work/repo/OthersCarND/jeremy-shannon/CarND-Behavioral-Cloning-Project:/sharedfolder -p 4567:4567 ml-docker-devel-gpu  bash
+sudo nvidia-docker run -it --rm -v /tmp/.X11-unix:/tmp/.X11-unix -v $XAUTHORITY:$XAUTHORITY -e XAUTHORITY=$XAUTHORITY -h $(hostname) -e DISPLAY=$DISPLAY -v ~/Work/repo/OthersCarND/jeremy-shannon/CarND-Behavioral-Cloning-Project:/sharedfolder -v ~/Work/data:/data -p 4567:4567 ml-docker-devel-gpu  bash
 ```
 
 #### How to push docker image to "https://hub.docker.com/r/eande/eande/"
